@@ -4,7 +4,7 @@ A personal medication management app for anyone juggling a complicated pill sche
 
 The UI takes visual cues from Instagram (clean type, hairline dividers, a white surface, and a minimal icon-only bottom tab bar) to keep the app feeling familiar and uncluttered.
 
-## LINK TO DEMO:
+## LINK TO DEMO: https://drive.google.com/file/d/1KSQYnUdknKZHi8Hp39stbjsqElOgj9yV/view?usp=sharing
 
 ## Features
 
