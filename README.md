@@ -1,8 +1,10 @@
 # MedsMinder
 
-A personal medication management app for older adults and anyone juggling a complicated pill schedule. Built with React Native (Expo SDK 54) and a FastAPI + ChromaDB + Gemini RAG backend that grounds every AI answer in real FDA drug labels.
+A personal medication management app for anyone juggling a complicated pill schedule. Built with React Native (Expo SDK 54) and a FastAPI + ChromaDB + Gemini RAG backend that grounds every AI answer in real FDA drug labels.
 
-The UI takes visual cues from Instagram — clean type, hairline dividers, a white surface, and a minimal icon-only bottom tab bar — to keep the app feeling familiar and uncluttered.
+The UI takes visual cues from Instagram (clean type, hairline dividers, a white surface, and a minimal icon-only bottom tab bar) to keep the app feeling familiar and uncluttered.
+
+## LINK TO DEMO:
 
 ## Features
 
