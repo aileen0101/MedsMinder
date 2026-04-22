@@ -8,23 +8,21 @@ The UI takes visual cues from Instagram (clean type, hairline dividers, a white 
 
 ## Features
 
-- **Home** — Calendar strip + today's schedule in morning / afternoon / evening / as-needed buckets. Tap a slot to log it as Taken; the app locks the row, decrements your pill count, and surfaces Refill and Avoid-today callouts for the day.
-- **Medications** — Add/remove meds with a full scheduling form (dose, strength, unit, times, instructions, max daily limit, refill info). Autocomplete pulls from the backend's ingested drug list so you don't have to retype. Detail view shows Today's progress, per-day cap, pills left, auto-generated food guidance, side effects and contraindications pulled from the FDA label, and a "More Information" AI summary with clickable source links (DailyMed).
-- **Support** — Symptom journal, an Ask-AI popup chatbot backed by RAG, and a Nearby map that searches Google Places for doctors/pharmacies near your current location.
-- **Emergency** — Blood type, allergies, conditions, emergency contacts, shareable with first responders via the native share sheet.
-- **Dose safety engine** (`services/doseEngine.ts`) — centralized logic shared by Home and Detail so counts never drift:
-  - Each dose is tied to a schedule slot (morning / noon / evening …) by `schedule.id`; slots are idempotent — tapping "Taken" twice on the same slot is a no-op, not a double log.
-  - "STOP — Possible overdose" alert (no override) when the next tap would exceed the prescribed daily cap.
+- **Home**: Calendar view + today's schedule in morning / afternoon / evening / as-needed buckets. Tap a slot to log it as Taken; the app locks the row, decrements your pill count, and surfaces Refill and Avoid-today callouts for the day.
+- **Medications** : Add/remove meds with a full scheduling form (dose, strength, unit, times, instructions, max daily limit, refill info). Autocomplete pulls from the backend's ingested drug list so you don't have to retype. Detail view shows Today's progress, per-day cap, pills left, auto-generated food guidance, side effects and contraindications pulled from the FDA label, and a "More Information" AI summary with clickable source links (DailyMed).
+- **Support** : Symptom journal, an Ask-AI popup chatbot backed by RAG, and a Nearby map that searches Google Places for doctors/pharmacies near your current location.
+- **Emergency** : Blood type, allergies, conditions, emergency contacts, shareable with first responders via the native share sheet.
+- **Dose safety engine** (`services/doseEngine.ts`) : centralized logic shared by Home and Detail:
+  - Each dose is tied to a schedule slot (morning / noon / evening …) by `schedule.id`;
   - "Too soon since last dose" soft warning when doses are logged <2 hours apart.
-  - Pill inventory is a *calculated* field (`recomputePillCount`), not a mutable counter, so Home and Detail always agree.
   - "Undo last" credits pills back to inventory; Skipped logs are implicit (anything not marked Taken).
-  - All date checks are LOCAL-day-based so evening doses don't silently land on the next UTC day for users west of UTC.
+  - All date checks are local
 
 ## Privacy
 
-All health data stays on your device in AsyncStorage — no accounts, no servers hold your personal log.
+All health data stays on your device in AsyncStorage, no servers hold your personal log.
 
-The Ask-AI and "More Information" features send your typed question (plus the drug name of the medication you opened) to your self-hosted RAG backend, which talks to Google's Gemini API. Sources are returned as clickable chips linking to the original FDA label on DailyMed. The privacy strings live in `constants/privacy.ts`.
+The Ask-AI and "More Information" features send your typed question (plus the drug name of the medication you opened) to a self-hosted RAG backend, which talks to Google's Gemini API. Sources are returned as clickable chips linking to the original FDA label on DailyMed. The privacy strings live in `constants/privacy.ts`.
 
 ---
 
@@ -160,9 +158,9 @@ backend/                        FastAPI + ChromaDB + Gemini RAG
 ## How the AI works
 
 1. **Ingestion** (`backend/ingest.py`) pulls each drug's FDA label from DailyMed, splits it into semantic sections (INDICATIONS, WARNINGS, ADVERSE REACTIONS, CONTRAINDICATIONS, etc.), embeds each chunk with `gemini-embedding-001`, and stores the vectors + metadata in ChromaDB.
-2. **Retrieval** (`backend/rag.py`) — for a user question, embed the query with the same model (using `task_type=RETRIEVAL_QUERY`), pull the top-k chunks for the referenced drug(s), and pass them as context to `gemini-2.5-flash`.
-3. **Structured extraction** — the detail page's food guidance, side effects, and contraindications are generated with Gemini's `response_schema` for guaranteed JSON output, with `thinking_budget=0` so the model doesn't burn tokens on hidden reasoning and then truncate the JSON.
-4. **Citations** — every response returns a `sources: ChatSource[]` list that the UI renders as tappable chips linking back to DailyMed, so the user can always verify.
+2. **Retrieval** (`backend/rag.py`) for a user question, embed the query with the same model (using `task_type=RETRIEVAL_QUERY`), pull the top-k chunks for the referenced drug(s), and pass them as context to `gemini-2.5-flash`.
+3. **Structured extraction** the detail page's food guidance, side effects, and contraindications are generated with Gemini's `response_schema` for guaranteed JSON output, with `thinking_budget=0` so the model doesn't burn tokens on hidden reasoning and then truncate the JSON.
+4. **Citations** every response returns a `sources: ChatSource[]` list that the UI renders as tappable chips linking back to DailyMed, so the user can always verify.
 
 Rate limiting lives in `backend/main.py` (per-day, per-user cap configurable via `RATE_LIMIT_PER_DAY`).
 
